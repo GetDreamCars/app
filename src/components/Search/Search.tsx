@@ -37,6 +37,7 @@ export default function Search() {
       <label className="block mb-2">
         <Autocomplete
           options={models}
+          disabled={!selectedBrand}
           renderInput={(params) => <TextField {...params} label="Wybierz model" />}
         />
       </label>
