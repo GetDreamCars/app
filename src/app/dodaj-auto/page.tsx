@@ -1,6 +1,7 @@
 "use client";
 import Header from "@/components/Header/Header";
 import Add from "@/components/Add/Add";
+
 export default function Home() {
 
   return (

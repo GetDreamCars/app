@@ -4,11 +4,13 @@ import { Autocomplete } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { getMakes, getModels } from 'car-info';
+import { useRouter } from 'next/navigation';
 
 export default function Search() {
   const [brands, setBrands] = useState<string[]>([]);
   const [models, setModels] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchedMakes = getMakes();
@@ -21,6 +23,11 @@ export default function Search() {
       setModels(fetchedModels);
     }
   }, [selectedBrand]);
+
+  const handleSearch = () => {
+    console.log("Search button clicked");
+    router.push('/szukaj');
+  };
 
   return (
     <div className="mt-16 grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -73,7 +80,7 @@ export default function Search() {
         className="bg-blue-500 text-white hover:bg-blue-600 col-span-2"
         variant="contained" 
         fullWidth 
-        onClick={() => handleSearch()}
+        onClick={handleSearch}
       >
         Szukaj
       </Button>
@@ -82,8 +89,3 @@ export default function Search() {
   </div>
   )
 }
-
-const handleSearch = () => {
-  // Implement search logic here
-  console.log("Search button clicked");
-};
