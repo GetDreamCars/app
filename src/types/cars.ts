@@ -5,8 +5,8 @@ export interface CarAdvertResponse {
     description: string;
     createdAt: string;
     validTo: string;
-    advertiserType: 'private';
-    status: 'active';
+    advertiserType: 'private' | 'business';
+    status: 'active' | 'inactive';
     contact: {
       firstName: string;
       lastName: string;
@@ -26,16 +26,16 @@ export interface CarAdvertResponse {
       mileage: number;
       bodyType: string;
       color: string;
-      video?: string;
+      video: string | null;
       fuelType: string;
       gearbox: string;
       price: {
         amount: number;
         currency: string;
-        grossNet: string;
+        grossNet: 'gross' | 'net';
       };
     };
-    imageCollection: null | string;
+    imageCollection: any | null;
   }
   
   // Poprawiony interfejs dla payloadu

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { CarAdvertPayload, CarAdvertResponse } from '@/types/cars';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -6,10 +8,6 @@ export const createCarAdvert = async (payload: CarAdvertPayload): Promise<CarAdv
   const response = await axios.post<CarAdvertResponse>(`${API_URL}/adverts`, payload);
   return response.data;
 };
-
-// Hook do użycia z React Query
-import { useMutation } from '@tanstack/react-query';
-import { CarAdvertPayload, CarAdvertResponse } from '@/types/cars';
 
 export const useCreateCarAdvert = () => {
   return useMutation<CarAdvertResponse, Error, CarAdvertPayload>({
@@ -23,47 +21,36 @@ export const useCreateCarAdvert = () => {
   });
 };
 
+export const getAllCars = async (): Promise<CarAdvertResponse[]> => {
+  const response = await axios.get<CarAdvertResponse[]>(`${API_URL}/adverts?limit=10000`);
+  return response.data;
+};
 
+export const useGetAllCars = () => {
+  return useQuery<CarAdvertResponse[], Error>({
+    queryKey: ['cars'],
+    queryFn: getAllCars,
+  });
+};
+
+export const getCarById = async (id: string): Promise<CarAdvertResponse> => {
+  const response = await axios.get<CarAdvertResponse>(`${API_URL}/adverts/${id}`);
+  return response.data;
+};
+
+export const useGetCarById = (id: string) => {
+  return useQuery<CarAdvertResponse, Error>({
+    queryKey: ['car', id],
+    queryFn: () => getCarById(id),
+    enabled: !!id,
+  });
+};
 /**
- * Api returns 
- * {
-	"id": 2,
-	"title": "Advert title",
-	"description": "Opis",
-	"createdAt": "2024-12-14T11:38:26.889583",
-	"validTo": "2024-12-02T14:30:00",
-	"advertiserType": "private",
-	"status": "active",
-	"contact": {
-		"firstName": "John",
-		"lastName": "Doe",
-		"phoneNumber": "111222333",
-		"city": "Warszawa"
-	},
-	"params": {
-		"vin": "11111111111111111",
-		"manufactureYear": 2018,
-		"brand": "Ford",
-		"model": "Focus",
-		"enginePower": 86,
-		"engineCapacity": 1596,
-		"doorCount": 4,
-		"generation": "gen-mk4-2018",
-		"version": "ver-1-6-gold-x",
-		"mileage": 199000,
-		"bodyType": "sedan",
-		"color": "white",
-		"video": "https://www.youtube.com/watch?v=code",
-		"fuelType": "petrol",
-		"gearbox": "manual",
-		"price": {
-			"amount": 20000,
-			"currency": "PLN",
-			"grossNet": "gross"
-		}
-	},
-	"imageCollection": null
-}
+ * Dodawanie kolekcji zdjec do ogloszenia 
+ * 
+ * 
+ * 
+ * POST http://localhost:8080/api/images/collections
  * 
  * 
  */

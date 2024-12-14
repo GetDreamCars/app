@@ -103,20 +103,22 @@ export default function Add() {
     // Optional: Reset form or redirect
   };
 
-  const fillWithFakeData = async () => {
-    // Losowy brand i model z dostępnych opcji
-    const randomBrand = brands[Math.floor(Math.random() * brands.length)];
-    setSelectedBrand(randomBrand);
+  const fillWithFakeData = () => {
+    // Najpierw pobierz wszystkie dostępne marki
+    const availableBrands = getMakes();
+    const randomBrand = availableBrands[Math.floor(Math.random() * availableBrands.length)];
     
-    // Pobierz modele dla wybranej marki
+    // Następnie pobierz modele dla wybranej marki
     const availableModels = getModels(randomBrand);
     const randomModel = availableModels[Math.floor(Math.random() * availableModels.length)];
     
-    // Ustaw model
+    // Ustaw wartości w stanie
+    setBrands(availableBrands);
     setModels(availableModels);
+    setSelectedBrand(randomBrand);
     setSelectedModel(randomModel);
     
-    // Dane kontaktowe
+    // Reszta wypełniania danych pozostaje bez zmian
     setFirstName(faker.person.firstName());
     setLastName(faker.person.lastName());
     setPhoneNumber(faker.phone.number('+48 ### ### ###'));
@@ -161,11 +163,13 @@ export default function Add() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Autocomplete
               options={brands}
+              value={selectedBrand}
               onChange={(_, value) => setSelectedBrand(value)}
               renderInput={(params) => <TextField {...params} label="Marka" required />}
             />
             <Autocomplete
               options={models}
+              value={selectedModel}
               onChange={(_, value) => setSelectedModel(value)}
               disabled={!selectedBrand}
               renderInput={(params) => <TextField {...params} label="Model" required />}
