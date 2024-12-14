@@ -35,16 +35,15 @@ export default function SearchPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {cars.map((car: CarAdvertResponse) => (
               <CarCard 
-
                 key={car.id} 
                 car={{
-                  id: car.id,
+                  id: car.id.toString(),
                   make: car.params.brand,
                   model: car.params.model,
                   year: car.params.manufactureYear,
                   mileage: car.params.mileage,
                   price: car.params.price.amount,
-                  imageUrl: car.imageCollection?.[0] || '/placeholder-car.jpg',
+                  imageCollection: car.imageCollection,
                   engineSize: car.params.engineCapacity,
                   power: car.params.enginePower,
                   transmission: car.params.gearbox,

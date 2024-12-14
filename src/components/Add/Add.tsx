@@ -4,7 +4,7 @@ import { Autocomplete, Stack, Dialog, DialogTitle, DialogContent, DialogActions 
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { getMakes, getModels } from 'car-info';
-import { useCreateCarAdvert } from '@/api/cars';
+import { useCreateCarAdvert, useUploadImageCollection } from '@/api/cars';
 import { CarAdvertPayload } from '@/types/cars';
 import { faker } from '@faker-js/faker/locale/pl';
 
@@ -38,9 +38,19 @@ export default function Add() {
   const [description, setDescription] = useState('');
 
   const { mutate: createAdvert, isPending } = useCreateCarAdvert();
+  const { mutate: uploadImages, isPending: isUploadingImages } = useUploadImageCollection({
+    onSuccess: (data) => {
+      setImagePreviewUrls(data.images.map(img => img.url));
+    }
+  });
 
   // Add new state for modal
   const [openSuccessModal, setOpenSuccessModal] = useState(false);
+
+  // Dodaj nowe stany
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [collectionId, setCollectionId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchedMakes = getMakes();
@@ -55,46 +65,20 @@ export default function Add() {
   }, [selectedBrand]);
 
   const handleAddCar = async () => {
-    const payload: CarAdvertPayload = {
-      title: `${selectedBrand} ${selectedModel}`,
-      description,
-      advertiserType: 'private',
-      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      imageCollectionId: null,
-      contact: {
-        firstName,
-        lastName,
-        phoneNumber,
-        city,
-      },
-      params: {
-        vin,
-        manufactureYear: year || 0,
-        brand: selectedBrand || '',
-        model: selectedModel || '',
-        enginePower,
-        engineCapacity,
-        doorCount,
-        gearbox,
-        generation,
-        version,
-        mileage,
-        fuelType,
-        bodyType,
-        color,
-        price: {
-          amount: price,
-          currency: 'PLN',
-          grossNet: 'gross'
+    if (selectedFiles.length > 0) {
+      uploadImages(selectedFiles, {
+        onSuccess: (data) => {
+          const collectionId = String(data.id);
+          setCollectionId(collectionId);
+          submitAdvertWithImages(collectionId);
+        },
+        onError: (error) => {
+          console.error('Błąd podczas uploadowania zdjęć:', error);
         }
-      }
-    };
-
-    createAdvert(payload, {
-      onSuccess: () => {
-        setOpenSuccessModal(true); // Show modal on success
-      }
-    });
+      });
+    } else {
+      submitAdvertWithImages(null);
+    }
   };
 
   // Add handler for closing modal
@@ -142,6 +126,75 @@ export default function Add() {
     // Modyfikacja generowania opisu
     const generatedDescription = faker.lorem.paragraph();
     setDescription(generatedDescription.slice(0, 254)); // Przycinamy tekst do 254 znaków
+  };
+
+  // Nowa funkcja do wysyłania ogłoszenia
+  const submitAdvertWithImages = (imageCollectionId: string | null) => {
+    const payload: CarAdvertPayload = {
+      title: `${selectedBrand} ${selectedModel}`,
+      description,
+      advertiserType: 'private',
+      validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      imageCollectionId, // dodaj ID kolekcji zdjęć
+      contact: {
+        firstName,
+        lastName,
+        phoneNumber,
+        city,
+      },
+      params: {
+        vin,
+        manufactureYear: year || 0,
+        brand: selectedBrand || '',
+        model: selectedModel || '',
+        enginePower,
+        engineCapacity,
+        doorCount,
+        gearbox,
+        generation,
+        version,
+        mileage,
+        fuelType,
+        bodyType,
+        color,
+        price: {
+          amount: price,
+          currency: 'PLN',
+          grossNet: 'gross'
+        }
+      }
+    };
+
+    createAdvert(payload, {
+      onSuccess: () => {
+        setOpenSuccessModal(true);
+        // Wyczyść stan zdjęć po udanym dodaniu
+        setSelectedFiles([]);
+        setImagePreviewUrls([]);
+        setCollectionId(null);
+      }
+    });
+  };
+
+  // Dodaj funkcję do usuwania zdjęć
+  const handleRemoveImage = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Dodaj nową funkcję do handlera plików
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files]);
+    
+    // Generuj tymczasowy podgląd zdjęć
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviewUrls(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   return (
@@ -285,13 +338,61 @@ export default function Add() {
             />
           </div>
 
+          {/* Dodaj sekcję ze zdjęciami przed przyciskiem "Dodaj ogłoszenie" */}
+          <div className="mt-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outlined"
+                  component="label"
+                  disabled={isUploadingImages}
+                >
+                  Wybierz zdjęcia
+                  <input
+                    type="file"
+                    hidden
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                  />
+                </Button>
+                <span className="text-sm text-gray-500">
+                  Wybrano zdjęć: {selectedFiles.length}
+                </span>
+              </div>
+
+              {/* Podgląd wybranych zdjęć */}
+              {imagePreviewUrls.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  {imagePreviewUrls.map((url, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <Button
             variant="contained"
             onClick={handleAddCar}
-            disabled={isPending}
+            disabled={isPending || isUploadingImages}
             className="bg-blue-500 hover:bg-blue-600 mt-4"
           >
-            {isPending ? 'Dodawanie...' : 'Dodaj ogłoszenie'}
+            {isPending || isUploadingImages ? 'Dodawanie...' : 'Dodaj ogłoszenie'}
           </Button>
         </Stack>
       </div>

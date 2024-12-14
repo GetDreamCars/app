@@ -45,6 +45,44 @@ export const useGetCarById = (id: string) => {
     enabled: !!id,
   });
 };
+
+interface ImageCollectionResponse {
+  id: number;
+  images: {
+    id: number;
+    url: string;
+  }[];
+}
+
+export const uploadImageCollection = async (files: File[]): Promise<ImageCollectionResponse> => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+
+  const response = await axios.post<ImageCollectionResponse>(
+    `${API_URL}/images/collections`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  );
+  return response.data;
+};
+
+export const useUploadImageCollection = () => {
+  return useMutation<ImageCollectionResponse, Error, File[]>({
+    mutationFn: uploadImageCollection,
+    onSuccess: (data) => {
+      console.log('Kolekcja zdjęć została dodana pomyślnie:', data);
+    },
+    onError: (error) => {
+      console.error('Błąd podczas dodawania kolekcji zdjęć:', error);
+    }
+  });
+};
 /**
  * Dodawanie kolekcji zdjec do ogloszenia 
  * 
@@ -52,5 +90,20 @@ export const useGetCarById = (id: string) => {
  * 
  * POST http://localhost:8080/api/images/collections
  * 
+ * payload: formData - files: File[]
  * 
+ * response: 
+ * 
+ * 
+ * {
+	"id": 2,
+	"images": [
+		{
+			"id": 2,
+			"url": "http://res.cloudinary.com/dblfuwaeo/image/upload/v1734175479/hhyiqxkr55mzwcj4ybab.jpg"
+		}
+	]
+}
+
+chce przypisac id z response do zmiennej collectionId w komponencie Add i zapisac do ogloszenia do pola imageCollection
  */

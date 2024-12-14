@@ -60,11 +60,25 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
             <Grid container spacing={4}>
               {/* Image Section */}
               <Grid item xs={12} md={6}>
-                <img
-                  src={car.imageCollection?.[0] || '/placeholder-car.jpg'}
-                  alt={`${car.params.brand} ${car.params.model}`}
-                  style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
-                />
+                <Grid container spacing={2}>
+                  {car.imageCollection?.images?.map((image, index) => (
+                    <Grid item xs={12} key={image.id}>
+                      <img
+                        src={image.url}
+                        alt={`${car.params.brand} ${car.params.model} - zdjęcie ${index + 1}`}
+                        style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                      />
+                    </Grid>
+                  )) || (
+                    <Grid item xs={12}>
+                      <img
+                        src="/placeholder-car.jpg"
+                        alt={`${car.params.brand} ${car.params.model}`}
+                        style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+                      />
+                    </Grid>
+                  )}
+                </Grid>
               </Grid>
 
               {/* Main Info Section */}
