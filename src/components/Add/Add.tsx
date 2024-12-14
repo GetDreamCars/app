@@ -8,6 +8,13 @@ import { useCreateCarAdvert, useUploadImageCollection } from '@/api/cars';
 import { CarAdvertPayload } from '@/types/cars';
 import { faker } from '@faker-js/faker/locale/pl';
 
+// Add this helper function at the top of the file, outside the component
+async function getImageFromUrl(url: string): Promise<File> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new File([blob], `car-${Math.random()}.jpg`, { type: 'image/jpeg' });
+}
+
 export default function Add() {
   // Podstawowe dane
   const [brands, setBrands] = useState<string[]>([]);
@@ -87,7 +94,7 @@ export default function Add() {
     // Optional: Reset form or redirect
   };
 
-  const fillWithFakeData = () => {
+  const fillWithFakeData = async () => {
     // Najpierw pobierz wszystkie dostępne marki
     const availableBrands = getMakes();
     const randomBrand = availableBrands[Math.floor(Math.random() * availableBrands.length)];
@@ -126,6 +133,25 @@ export default function Add() {
     // Modyfikacja generowania opisu
     const generatedDescription = faker.lorem.paragraph();
     setDescription(generatedDescription.slice(0, 254)); // Przycinamy tekst do 254 znaków
+    
+    // Add this new code after the description setting
+    try {
+      // Use specific Pexels car images
+      const imageUrls = [
+        'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg',
+        'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg'
+      ];
+
+      // Convert URLs to Files
+      const imageFiles = await Promise.all(imageUrls.map(url => getImageFromUrl(url)));
+      setSelectedFiles(imageFiles);
+      
+      // Generate preview URLs
+      setImagePreviewUrls(imageUrls);
+      
+    } catch (error) {
+      console.error('Error generating fake images:', error);
+    }
   };
 
   // Nowa funkcja do wysyłania ogłoszenia
@@ -204,7 +230,7 @@ export default function Add() {
           <h2 className="text-xl font-bold">Dodaj ogłoszenie</h2>
           <Button
             variant="outlined"
-            onClick={fillWithFakeData}
+            onClick={() => fillWithFakeData().catch(console.error)}
             className="border-blue-500 text-blue-500 hover:bg-blue-50"
           >
             Wypełnij przykładowymi danymi
