@@ -2,11 +2,21 @@
 import Header from "@/components/Header/Header";
 import Search from "@/components/Search/Search";
 import { useEffect, useState } from "react";
-
+import { supabase } from "@/utils/supabase/client";
 export default function Home() {
   const [backgroundImage, setBackgroundImage] = useState('https://images.pexels.com/photos/757184/pexels-photo-757184.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-
+  
+  const fetchCountries = async () => {
+    const { data: cars } = await supabase
+      .from('cars')
+      .select('*')
+      .order('name', { ascending: true });
+    console.log(cars);
+  };
+  
   useEffect(() => {
+    fetchCountries();
+
     const images = [
       'https://images.pexels.com/photos/170813/pexels-photo-170813.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
       'https://images.pexels.com/photos/235226/pexels-photo-235226.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',

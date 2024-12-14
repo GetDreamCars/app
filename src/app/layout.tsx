@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { StyledEngineProvider } from "@mui/material/styles";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Dream Cars",
@@ -15,9 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StyledEngineProvider injectFirst>
-        {children}
-        </StyledEngineProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
