@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { CarAdvertPayload, CarAdvertResponse } from '@/types/cars';
+import { CarAdvertPayload, CarAdvertResponse, CarAdvertsResponse } from '@/types/cars';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -21,15 +21,45 @@ export const useCreateCarAdvert = () => {
   });
 };
 
-export const getAllCars = async (): Promise<CarAdvertResponse[]> => {
-  const response = await axios.get<CarAdvertResponse[]>(`${API_URL}/adverts?limit=10000`);
+export const getAllCars = async (filters: {
+  brand?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  yearFrom?: string;
+  yearTo?: string;
+  mileageFrom?: string;
+  mileageTo?: string;
+  fuelType?: string;
+  gearbox?: string;
+}): Promise<CarAdvertsResponse> => {
+  const adjustedFilters = Object.fromEntries(
+    Object.entries(filters).filter(
+      ([, value]) => value !== ''
+    )
+  );
+
+  const response = await axios.post<CarAdvertsResponse>(`${API_URL}/adverts/search`, {
+    limit: 10000,
+    ...adjustedFilters,
+  });
+  console.log('response', response.data);
   return response.data;
 };
 
-export const useGetAllCars = () => {
-  return useQuery<CarAdvertResponse[], Error>({
-    queryKey: ['cars'],
-    queryFn: getAllCars,
+export const useGetAllCars = (filters: {
+  brand?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  yearFrom?: string;
+  yearTo?: string;
+  mileageFrom?: string;
+  mileageTo?: string;
+  fuelType?: string;
+  gearbox?: string;
+}) => {
+  return useQuery<CarAdvertsResponse, Error>({
+    queryKey: ['cars', filters],
+    queryFn: () => getAllCars(filters),
   });
 };
 

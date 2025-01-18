@@ -11,23 +11,23 @@ export default function SearchPage() {
   const brand = searchParams.get('brand');
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
-  const yearFrom = searchParams.get('yearFrom');
-  const yearTo = searchParams.get('yearTo');
-  const mileageFrom = searchParams.get('mileageFrom');
-  const mileageTo = searchParams.get('mileageTo');
+  const minYear = searchParams.get('minYear');
+  const maxYear = searchParams.get('maxYear');
+  const minMileage = searchParams.get('minMileage');
+  const maxMileage = searchParams.get('maxMileage');
   const fuelType = searchParams.get('fuelType');
-  const gearbox = searchParams.get('gearbox');
+  const gearboxType  = searchParams.get('gearbox');
 
   const { data: cars, isLoading, error } = useGetAllCars({
     brand,
     minPrice,
     maxPrice,
-    yearFrom,
-    yearTo,
-    mileageFrom,
-    mileageTo,
+    minYear,
+    maxYear,
+    minMileage,
+    maxMileage,
     fuelType,
-    gearbox,
+    gearboxType,
   });
 
   if (error) {
@@ -41,21 +41,23 @@ export default function SearchPage() {
     );
   }
 
+  console.log('cars>', cars?.content);
+
   return (
     <>
       <Header />
       <div className="container mx-auto p-4">
         {isLoading ? (
           <div className="text-center p-4">
-            Loading...
+            Ładowanie...
           </div>
-        ) : !cars || cars.length === 0 ? (
+        ) : !cars || cars.content.length === 0 ? (
           <div className="text-center p-4">
-            No cars found
+            Nie znaleziono samochodów
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cars.map((car: CarAdvertResponse) => (
+            {cars?.content.map((car: CarAdvertResponse) => (
               <CarCard 
                 key={car.id} 
                 car={{

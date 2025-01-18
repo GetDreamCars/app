@@ -18,6 +18,19 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
+const fuelTypeLabels: Record<string, string> = {
+  petrol: 'Benzyna',
+  diesel: 'Diesel',
+  electric: 'Elektryczny',
+  hybrid: 'Hybrydowy'
+};
+
+const gearboxTypeLabels: Record<string, string> = {
+  manual: 'Manualna',
+  automatic: 'Automatyczna',
+  'semi-automatic': 'Półautomatyczna'
+};
+
 export default function CarDetailsPage({ params }: { params: { id: string } }) {
   const { data: car, isLoading, error } = useGetCarById(params.id);
 
@@ -120,12 +133,12 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LocalGasStation /> Paliwo: {car.params.fuelType}
+                        <LocalGasStation /> Paliwo: {fuelTypeLabels[car.params.fuelType] || car.params.fuelType}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Settings /> Skrzynia: {car.params.gearbox}
+                        <Settings /> Skrzynia: {gearboxTypeLabels[car.params.gearbox] || car.params.gearbox}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
