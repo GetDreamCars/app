@@ -14,6 +14,9 @@ import {
   Phone,
   LocationOn
 } from '@mui/icons-material';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 export default function CarDetailsPage({ params }: { params: { id: string } }) {
   const { data: car, isLoading, error } = useGetCarById(params.id);
@@ -51,6 +54,14 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1
+  };
+
   return (
     <>
       <Header />
@@ -60,25 +71,25 @@ export default function CarDetailsPage({ params }: { params: { id: string } }) {
             <Grid container spacing={4}>
               {/* Image Section */}
               <Grid item xs={12} md={6}>
-                <Grid container spacing={2}>
+                <Slider {...settings}>
                   {car.imageCollection?.images?.map((image, index) => (
-                    <Grid item xs={12} key={image.id}>
+                    <div key={image.id}>
                       <img
                         src={image.url}
                         alt={`${car.params.brand} ${car.params.model} - zdjęcie ${index + 1}`}
                         style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                       />
-                    </Grid>
+                    </div>
                   )) || (
-                    <Grid item xs={12}>
+                    <div>
                       <img
                         src="/placeholder-car.jpg"
                         alt={`${car.params.brand} ${car.params.model}`}
                         style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
                       />
-                    </Grid>
+                    </div>
                   )}
-                </Grid>
+                </Slider>
               </Grid>
 
               {/* Main Info Section */}
