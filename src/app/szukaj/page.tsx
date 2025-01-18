@@ -4,9 +4,31 @@ import Header from "@/components/Header/Header";
 import CarCard from "@/components/Card/Card";
 import { useGetAllCars } from '@/api/cars';
 import { CarAdvertResponse } from '@/types/cars';
+import { useSearchParams } from 'next/navigation';
 
 export default function SearchPage() {
-  const { data: cars, isLoading, error } = useGetAllCars();
+  const searchParams = useSearchParams();
+  const brand = searchParams.get('brand');
+  const minPrice = searchParams.get('minPrice');
+  const maxPrice = searchParams.get('maxPrice');
+  const yearFrom = searchParams.get('yearFrom');
+  const yearTo = searchParams.get('yearTo');
+  const mileageFrom = searchParams.get('mileageFrom');
+  const mileageTo = searchParams.get('mileageTo');
+  const fuelType = searchParams.get('fuelType');
+  const gearbox = searchParams.get('gearbox');
+
+  const { data: cars, isLoading, error } = useGetAllCars({
+    brand,
+    minPrice,
+    maxPrice,
+    yearFrom,
+    yearTo,
+    mileageFrom,
+    mileageTo,
+    fuelType,
+    gearbox,
+  });
 
   if (error) {
     return (
